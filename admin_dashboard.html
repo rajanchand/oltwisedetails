@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Admin Dashboard - Dish Media Network</title>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Dish Media Network Admin Dashboard</h1>
+        <div class="stats">
+            <h2>Total OLTs: <span id="totalOLTs">0</span></h2>
+            <h2>Total PODs: <span id="totalPODs">0</span></h2>
+            <h2>Total Regions: <span id="totalRegions">0</span></h2>
+        </div>
+
+        <div class="menu">
+            <h2>OSS Menu</h2>
+            <form id="dataEntryForm">
+                <input type="text" id="olt_name" placeholder="OLT Name" required>
+                <input type="text" id="pod_name" placeholder="Pod Name" required>
+                <input type="text" id="vendor_name" placeholder="Vendor Name" required>
+                <input type="text" id="ip_address" placeholder="IP Address" required>
+                <input type="text" id="region_name" placeholder="Region Name" required>
+                <input type="text" id="rtl_name" placeholder="RTL Name" required>
+                <button type="submit">Save Entry</button>
+            </form>
+
+            <h2>Data Entries</h2>
+            <ul id="dataEntriesList"></ul>
+        </div>
+        
+        <button id="logoutButton">Logout</button>
+    </div>
+
+    <script>
+        const dataEntries = JSON.parse(localStorage.getItem('dataEntries')) || [];
+
+        document.getElementById('dataEntryForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const entry = {
+                olt_name: document.getElementById('olt_name').value,
+                pod_name: document.getElementById('pod_name').value,
+                vendor_name: document.getElementById('vendor_name').value,
+                ip_address: document.getElementById('ip_address').value,
+                region_name: document.getElementById('region_name').value,
+                rtl_name: document.getElementById('rtl_name').value,
+            };
+            dataEntries.push(entry);
+            localStorage.setItem('dataEntries', JSON.stringify(dataEntries));
+            displayEntries();
+            updateStats();
+            this.reset();
+        });
+
+        function displayEntries() {
+            const list = document.getElementById('dataEntriesList');
+            list.innerHTML = '';
+            dataEntries.forEach((entry, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${entry.olt_name} - ${entry.pod_name} - ${entry.vendor_name}`;
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Edit';
+                editButton.onclick = () => editEntry(index);
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => deleteEntry(index);
+                listItem.appendChild(editButton);
+                listItem.appendChild(deleteButton);
+                list.appendChild(listItem);
+            });
+        }
+
+        function editEntry(index) {
+            const entry = dataEntries[index];
+            document.getElementById('olt_name').value = entry.olt_name;
+            document.getElementById('pod_name').value = entry.pod_name;
+            document.getElementById('vendor_name').value = entry.vendor_name;
+            document.getElementById('ip_address').value = entry.ip_address;
+            document.getElementById('region_name').value = entry.region_name;
+            document.getElementById('rtl_name').value = entry.rtl_name;
+            deleteEntry(index);
+        }
+
+        function deleteEntry(index) {
+            dataEntries.splice(index, 1);
+            localStorage.setItem('dataEntries', JSON.stringify(dataEntries));
+            displayEntries();
+            updateStats();
+        }
+
+        function updateStats() {
+            const totalOLTs = new Set(dataEntries.map(entry => entry.olt_name)).size;
+            const totalPODs = new Set(dataEntries.map(entry => entry.pod_name)).size;
+            const totalRegions = new Set(dataEntries.map(entry => entry.region_name)).size;
+            document.getElementById('totalOLTs').textContent = totalOLTs;
+            document.getElementById('totalPODs').textContent = totalPODs;
+            document.getElementById('totalRegions').textContent = totalRegions;
+        }
+
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            window.location.href = 'index.html';
+        });
+
+        displayEntries();
+        updateStats();
+    </script>
+</body>
+</html>

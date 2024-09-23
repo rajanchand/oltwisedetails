@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Agent Dashboard - Dish Media Network</title>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Dish Media Network Agent Dashboard</h1>
+        <div class="user-info">
+            <h3>Logged in as: Agent</h3>
+        </div>
+
+        <label for="oltSelect">Select an OLT:</label>
+        <select id="oltSelect"></select>
+
+        <h2>OLT Details</h2>
+        <div id="oltDetails"></div>
+
+        <button id="logoutButton">Logout</button>
+    </div>
+
+    <script>
+        const dataEntries = JSON.parse(localStorage.getItem('dataEntries')) || [];
+
+        const oltSelect = document.getElementById('oltSelect');
+        const oltDetails = document.getElementById('oltDetails');
+
+        function populateOLTSelect() {
+            const uniqueOLTs = [...new Set(dataEntries.map(entry => entry.olt_name))];
+            uniqueOLTs.forEach(olt => {
+                const option = document.createElement('option');
+                option.value = olt;
+                option.textContent = olt;
+                oltSelect.appendChild(option);
+            });
+        }
+
+        oltSelect.addEventListener('change', function() {
+            const selectedOLT = this.value;
+            const entry = dataEntries.find(e => e.olt_name === selectedOLT);
+            if (entry) {
+                oltDetails.innerHTML = `
+                    <p><strong>OLT Name:</strong> ${entry.olt_name}</p>
+                    <p><strong>Pod Name:</strong> ${entry.pod_name}</p>
+                    <p><strong>Vendor Name:</strong> ${entry.vendor_name}</p>
+                    <p><strong>IP Address:</strong> ${entry.ip_address}</p>
+                    <p><strong>Region Name:</strong> ${entry.region_name}</p>
+                    <p><strong>RTL Name:</strong> ${entry.rtl_name}</p>
+                `;
+            } else {
+                oltDetails.innerHTML = '<p>Select an OLT to see its details.</p>';
+            }
+        });
+
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            window.location.href = 'index.html';
+        });
+
+        populateOLTSelect();
+    </script>
+</body>
+</html>
